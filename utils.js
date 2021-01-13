@@ -66,7 +66,7 @@ export class PickerRun {
 			endRule,
 			defaultValue
 		} = source
-		this.mode = mode
+		this.mode = mode.trim()
 		this.columns = mode.split('')
 		this.firstKey = mode[0]
 		this.startRule = startRule || this.getDefRule('startRule')
