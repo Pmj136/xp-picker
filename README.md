@@ -1,15 +1,15 @@
-# e-picker-plus
+# xp-picker
 
 ### 
+- 上一代e-picker-plus的优化版本，适配任何可选列的配置，包括但不限于'y-m-d h:i'、'm-d'等，详情请看文档
 - 功能强、通用性强、多端兼容。兼容h5、微信小程序(其他平台小程序未作测试)与app
-
 
 ### 一、使用示例
 #### 示例1：函数式打开picker，通过 this.$refs[ref].show()
 ```html
     <template>
     	<view>
-    		<e-picker-plus ref="picker"  @confirm="confirm" />
+    		<xp-picker ref="picker"  @confirm="confirm" />
     		<view @tap="show">开启</view>
     	</view>
     </template>
@@ -28,11 +28,11 @@
 		}
 	</script>
 ```
-#### 示例2：e-picker-plus包含一个默认插槽，点击内容直接打开picker弹窗
+#### 示例2：xp-picker包含一个默认插槽，点击内容直接打开picker弹窗
 ```html
     <template>
     	<view>
-    		<e-picker-plus @confirm="confirm">打开</e-picker-plus>
+    		<xp-picker @confirm="confirm">打开</xp-picker>
     	</view>
     </template>
 ```
@@ -56,44 +56,45 @@
 | mode             | String | 否  |  YMD                   | 见下方mode 详细介绍       |
 | height           | Number | 否  |  35                    | 选择器的高度，单位vh     |
 | animation        | Boolean| 否  |  true                     | 打开和关闭是否使用动画效果      |
-| defaultValue     | String | 否  |  当前时间                  | 打开选择器时默认选中的时间,详细见下方使用方式      |
-| initOnOpen       | Boolean| 否  |  false                    | 每次打开picker时是否重置显示的时间(若设置defaultValue将重置为defaultVale,否则重置为当前时间)      |
-| startRule       | String| 否  |  一天的开始                  | 此规则之前的时间将不可选      |
-| endRule       | String| 否  |  一天的结束                    | 此规则之后的时间将不可选       |
-| ~~start~~        |  |   |               | v1.2已移除，请使用startRule    |
-| ~~end~~          |  |   |              | v1.2已移除，请使用endRule     |
+| value     | String | 否  |  当前时间                  | 打开选择器时默认选中的时间,详细见下方使用方式      |
+| history       | Boolean| 否  |  false                    | 每次打开picker时，是否保持用户最后一次选择的历史时间，若为fasle,则每次打开显示当前时间|
+| ~~startRule~~       | String| 否  |  一天的开始                  | v2.0已移除      |
+| ~~endRule~~       | String| 否  |  一天的结束                    | v2.0已移除      |
+| ~~start~~        |  |   |               | v1.2已移除    |
+| ~~end~~          |  |   |              | v1.2已移除     |
 | ~~errorMsg~~         |  |   |   | v1.2已移除     |
 
 
-
-
-### 1、mode的使用(Y年；M月；D日；h时；m分；s秒)
+### 1、mode的使用(y年；m月；d日；h时；i分；s秒)
 | 可选类型             | 描述  |
 | -------| --------------------------------- |
-| Y        | picker将只显示 '年'一列       |
-| YM        | picker将只显示 '年月'两列      |
-| YMD         | picker将只显示 '年月日'两列      |
-| YMDh       | picker将只显示 '年月日时'四列       |
-| YMDhm      | picker将显示 '年月日时分'五列       |
-| YMDhms     | picker将显示 '年月日时分秒'六列      |
-| h         | picker将只显示 '时'一列       |
-| hm       | picker将只显示 '时分'两列       |
-| hms       | picker将只显示 '时分秒'两列        |
-| m      | ……   v1.2新增    |
-| s       | ……  v1.2新增     |
-| ms       | ……  v1.2新增     |
+| y        | picker将只显示 '年'一列       |
+| ym        | picker将只显示 '年月'两列      |
+| ymd        | picker将只显示 '年月日'两列      |
+| ymdh      | picker将只显示 '年月日时'四列       |
+| ymdhi     | picker将显示 '年月日时分'五列       |
+| ymdhis     | picker将显示 '年月日时分秒'六列      |
+| m       | 略……        |
+| d       | 略……         |
+| h       | 略……         |
+| i       | 略……         |
+| s       | 略……         |
+| md       |略……        |
+| hi       | 略……         |
+| is      | 略……         |
+| his       | 略……        |
+| mdh       | 略……         |
+| mdhi       | 略……         |
+| mdhis      | 略……       |
 
-
-### 2、defaultValue的使用
+### 2、value的使用
 此选项用于自定义picker打开时的显示时间，同样需要与mode对应  
-#### PS:如果设置了startRule或endRule ，defaultValue的值应在规则范围之内，否则出现不可预料的bug
-| mode    | defaultValue格式  |
+
+| mode    | value格式（必须）  |
 | --------- | --------------------------------- |
-| YMD   |  yyyy-MM-dd  |
-| hms    | HH:mm:ss    |
+| ymd   |  yyyy-MM-dd  |
+| his    | HH:mm:ss    |
 |    …… |      ……     |
-
-
 
 
 ### 三、事件
@@ -106,11 +107,11 @@
 #### confirm 事件返回属性介绍
 | 属性      | 类型  | 描述    |
 | --------- | ------------------------ |--------------------------|
-| isOverTime   | Boolean     | 选择的时间是否超过当前北京时间（v1.2新增）
+| ~~isOverTime~~   | Boolean     | v2.0.0已移除|
 | result    | String     |选择的时间 例如:'2020-12-06'|
 | resultArr    | Array<String>     |例如:['2020年','12月','06日']|
-| timestamp    | BigInt     |返回的时间戳，仅mode为"YMDhms"有效|
+| timestamp    | BigInt     |返回的时间戳，支持理论可转换的时间|
 
 
 ### 四、插槽
-可使用此方式打开picker弹窗，若样式不满足需求，源文件样式类名已写好，可直接添加css
+可使用此方式打开picker弹窗
