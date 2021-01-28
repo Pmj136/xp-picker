@@ -59,7 +59,7 @@
 | value     | String | 否  |  当前时间                  | 打开选择器时默认选中的时间,详细见下方使用方式      |
 | year-range      |Array | 否  | [2016,null]      | 数组第一项代表开始年份(配置为null将使用默认2016)，第二项代表结束年份(配置null将使用本年)，配置示例:[2010,null]     |
 | history       | Boolean| 否  |  false                    | 每次打开picker时，是否保持用户最后一次选择的历史时间，若为fasle,则每次打开显示当前时间|
-| action-position| String|否   |top     |       可选 bottom                  |
+| action-position| String|否   |top     |       可选 bottom,设置"取消"和"确定"按钮的位置      |
 | ~~startRule~~       | |   |                  | v2.0已移除      |
 | ~~endRule~~       | |  |                      | v2.0已移除      |
 | ~~start~~        |  |   |               | v1.2已移除    |
