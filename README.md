@@ -3,7 +3,7 @@
 ### 
 - 上一代e-picker-plus的优化版本，适配任何可选列的配置，包括但不限于'y-m-d h:i'、'm-d'等，详情请看文档
 - 功能强、通用性强、多端兼容。兼容h5、微信小程序(其他平台小程序未作测试)与app
-
+- 
 ### 一、使用示例
 #### 示例1：函数式打开picker，通过 this.$refs[ref].show()
 ```html
@@ -58,8 +58,8 @@
 | animation        | Boolean| 否  |  true                     | 打开和关闭是否使用动画效果      |
 | value     | String | 否  |  当前时间                  | 打开选择器时默认选中的时间,详细见下方使用方式      |
 | history       | Boolean| 否  |  false                    | 每次打开picker时，是否保持用户最后一次选择的历史时间，若为fasle,则每次打开显示当前时间|
-| ~~startRule~~       | String| 否  |  一天的开始                  | v2.0已移除      |
-| ~~endRule~~       | String| 否  |  一天的结束                    | v2.0已移除      |
+| ~~startRule~~       | |   |                  | v2.0已移除      |
+| ~~endRule~~       | |  |                      | v2.0已移除      |
 | ~~start~~        |  |   |               | v1.2已移除    |
 | ~~end~~          |  |   |              | v1.2已移除     |
 | ~~errorMsg~~         |  |   |   | v1.2已移除     |
@@ -87,6 +87,7 @@
 | mdhi       | 略……         |
 | mdhis      | 略……       |
 
+未出现在表格中的配置代表不支持。但是xp-picker可以适配任何自定义列，比如：其中'dh'未预定义，因此只需在源码加一行dh的预定义即可(util.js/getLocalTime)，不会联系作者，热心答复
 ### 2、value的使用
 此选项用于自定义picker打开时的显示时间，同样需要与mode对应  
 
@@ -107,7 +108,7 @@
 #### confirm 事件返回属性介绍
 | 属性      | 类型  | 描述    |
 | --------- | ------------------------ |--------------------------|
-| ~~isOverTime~~   | Boolean     | v2.0.0已移除|
+| ~~isOverTime~~   |     | v2.0.0已移除|
 | result    | String     |选择的时间 例如:'2020-12-06'|
 | resultArr    | Array<String>     |例如:['2020年','12月','06日']|
 | timestamp    | BigInt     |返回的时间戳，支持理论可转换的时间|
