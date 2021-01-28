@@ -7,12 +7,13 @@
 			<view class="xp-picker-mask" :class="{'xp-picker-animation':animation}" :style="{'opacity':pickerVisible?0.6:0}"
 			 @tap="_cancel"></view>
 			<view class="xp-picker-container" :class="{'xp-picker-container--show':pickerVisible,'xp-picker-animation':animation}">
-				<view class="xp-picker-action_h5">
-					<view class="xp-picker-action--cancel_h5" @tap="_cancel">取消</view>
-					<view class="xp-picker-action--confirm_h5" @tap="_confirm">确定</view>
+				<view v-if="actionPosition==='top'" class="xp-picker-action">
+					<view class="xp-picker-action--cancel" @tap="_cancel">取消</view>
+					<view class="xp-picker-action--confirm" @tap="_confirm">确定</view>
 				</view>
 				<view v-if="isError" class="xp-picker-error" :style="{'height':height+'vh'}">
-					Render Error
+					<text>Error！please check your configuration</text>
+					<text>（请检查你的配置 或 查看控制台错误信息）</text>
 				</view>
 				<picker-view v-else :style="{'height':height+'vh'}" indicator-style="height:40px;" :value="selected" @change="_change">
 					<picker-view-column v-for="(k,i) in modeArr" :key="i" class="xp-picker-column">
@@ -21,6 +22,10 @@
 						</view>
 					</picker-view-column>
 				</picker-view>
+				<view v-if="actionPosition==='bottom'" class="xp-picker-button">
+					<button class="xp-button xp-button--cancel" @tap="_cancel">取消</button>
+					<button class="xp-button xp-button--confirm" @tap="_confirm">确定</button>
+				</view>
 			</view>
 		</view>
 	</view>
@@ -56,6 +61,10 @@
 			height: {
 				type: [Number, String],
 				default: 35
+			},
+			'action-position': {
+				type: String,
+				default: "top"
 			},
 			'year-range': {
 				type: Array,
@@ -98,7 +107,7 @@
 						this.isError = true
 						throw new Error("render error，because the 'value' cannot be formatted as 'mode'")
 					}
-				}	
+				}
 				if (this.yearRange.length !== 2) {
 					this.isError = true
 					throw new Error("render error，because the length of array 'year-rang' must be 2")
@@ -181,7 +190,7 @@
 				this.pickerVisible = true
 			},
 			_confirm() {
-				this.$emit('confirm', this._getResult())
+				if (!this.isError) this.$emit('confirm', this._getResult())
 				this.pickerVisible = false
 			},
 			_getResult() {
@@ -197,9 +206,16 @@
 				this.pickerVisible = false
 			},
 			_change(e) {
+				let col;
 				const newValue = e.detail.value
+				for (let i = 0; i < newValue.length; i++) {
+					if (newValue[i] !== this.selected[i]) {
+						col = this.modeArr[i]
+						break
+					}
+				}
 				const index = this.mode.indexOf("d")
-				if (index !== -1 && this.mode.length > 1) {
+				if (index !== -1 && (col === 'y' || col === 'm')) {
 					const dtObj = this.selected2Obj(newValue)
 					this.fillCol("d", 1, getDate(dtObj))
 				}
@@ -250,32 +266,69 @@
 	.xp-picker-error {
 		width: 100%;
 		display: flex;
+		flex-direction: column;
 		justify-content: center;
 		align-items: center;
+		color: #ff0000
 	}
 
-	.xp-picker-action_h5 {
+	.xp-picker-action {
 		width: 100%;
 		display: flex;
 		justify-content: space-between;
-		padding: 22rpx 28rpx;
+		align-items: center;
+		height: 90rpx;
+		padding: 0 28rpx;
 		box-sizing: border-box;
 		position: relative;
 		font-size: 34rpx;
 		border-bottom: 0.5px solid #e5e5e5
 	}
 
-	.xp-picker-action--cancel_h5 {
+	.xp-picker-button {
+		width: 100%;
+		display: flex;
+		justify-content: space-around;
+		align-items: center;
+		height: 160rpx;
+		padding: 0 20rpx;
+		box-sizing: border-box;
+		position: relative;
+	}
+
+	.xp-button {
+		line-height: 2.4;
+		font-size: 32rpx;
+		margin: 0;
+		padding: 0 80rpx;
+	}
+
+	.xp-button:after {
+		border: none;
+	}
+
+	.xp-button--cancel {
+		background-color: #f5f5f5;
+		color: #000;
+	}
+
+	.xp-button--confirm {
+		background-color: #47a16e;
+		color: #fff;
+	}
+
+	.xp-picker-action--cancel {
 		opacity: .7;
 	}
 
-	.xp-picker-action--confirm_h5 {
+	.xp-picker-action--confirm {
 		color: #007aff;
 	}
 
 	.xp-picker-column {
 		text-align: center;
 		border: none;
+		font-size: 34rpx;
 	}
 
 	.xp-picker-list-item {
