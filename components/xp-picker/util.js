@@ -35,7 +35,7 @@ export function templateFactory({
 	for (const key of mode) {
 		ret[key] = variables[key]
 	}
-	ret['y'].range = [start || 2016, end || new Date().getFullYear()]
+	if (mode.indexOf("y") !== -1) ret['y'].range = [start || 2016, end || new Date().getFullYear()]
 	if (mode.indexOf("d") !== -1) {
 		const date = getDate(value || getLocalTime(mode))
 		ret['d'].range = [1, date]

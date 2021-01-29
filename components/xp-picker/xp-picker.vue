@@ -38,7 +38,7 @@
 		fmtNumber,
 		time2Timestamp,
 		getDate
-	} from "./util.min.js"
+	} from "./util.js"
 	export default {
 		name: 'XpPicker',
 		data() {
