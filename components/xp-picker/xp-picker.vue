@@ -112,21 +112,23 @@
 				this.initSelected() //设置默认值
 			},
 			assert() {
-				if ("ymdhis".indexOf(this.mode) === -1) {
+				if ("ymdhis".indexOf(this.mode) === -1)
 					throw new Error("render error，illegal 'mode'")
-				}
-				if (getLocalTime(this.mode) == undefined) {
+
+				if (getLocalTime(this.mode) == undefined)
 					throw new Error("render error，the 'mode' is not found")
-				}
+
 				if (this.value != null) {
-					const arr = this.value.split(/-|:|\s/)
-					if (arr.length != this.modeArr.length) {
+					if (this.value.length !== getLocalTime(this.mode).length)
 						throw new Error("render error，because the 'value' cannot be formatted as 'mode'")
-					}
+					const arr = this.value.split(/-|:|\s/)
+					if (arr.length != this.modeArr.length)
+						throw new Error("render error，because the 'value' cannot be formatted as 'mode'")
+
 				}
-				if (this.yearRange.length !== 2) {
+				if (this.yearRange.length !== 2)
 					throw new Error("render error，because the length of array 'year-rang' must be 2")
-				}
+
 				this.isError = false
 			},
 			initCols() {
@@ -153,7 +155,14 @@
 				for (let i = 0; i < a.length; i++)
 					this.$set(this.selected, i, a[i].indexOf(arr[i]))
 			},
-			resolveCurrentDt() {
+			show() {
+				if (this.history) {
+					if (!this.isConfirm) this.initSelected()
+				} else
+					this.initSelected()
+				this.pickerVisible = true
+			},
+			_resolveCurrentDt() {
 				let str = ""
 				for (let i = 0; i < this.selected.length; i++)
 					str += this.cols[i][this.selected[i]] + this.units[i]
@@ -168,13 +177,6 @@
 					dt = dt.substring(0, dt.length - 1)
 				return dt
 			},
-			show() {
-				if (this.history) {
-					if (!this.isConfirm) this.initSelected()
-				} else
-					this.initSelected()
-				this.pickerVisible = true
-			},
 			_confirm() {
 				if (!this.isError) this.$emit('confirm', this._getResult())
 				if (!this.isConfirm) this.isConfirm = true
@@ -182,7 +184,7 @@
 			},
 			_getResult() {
 				const detail = {
-					value: this.resolveCurrentDt()
+					value: this._resolveCurrentDt()
 				}
 				const tp = time2Timestamp(detail.value)
 				if (!isNaN(tp)) detail.timestamp = tp
@@ -204,7 +206,7 @@
 				this.selected = newValue
 				const index = this.mode.indexOf("d")
 				if (index !== -1 && (col === 'y' || col === 'm')) {
-					const currentDt = this.resolveCurrentDt()
+					const currentDt = this._resolveCurrentDt()
 					this.fillCol("d", 1, getDate(currentDt))
 				}
 			}
