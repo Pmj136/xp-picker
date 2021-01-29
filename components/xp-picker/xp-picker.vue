@@ -43,7 +43,7 @@
 		name: 'XpPicker',
 		data() {
 			return {
-				isError: true,
+				isError: false,
 				isConfirm: false,
 				pickerVisible: false,
 				template: {},
@@ -102,34 +102,25 @@
 			},
 		},
 		created() {
-			this.render()
+			const isDev = process.env.NODE_ENV === 'development'
+			if (isDev) {
+				//检查用户配置，提升性能：生产环境不检查
+				import("./dev.js").then(res => {
+					try {
+						res.assert(this)
+						this.render()
+					} catch (e) {
+						console.error(e)
+						this.isError = true
+					}
+				})
+			} else this.render()
 		},
 		methods: {
 			render() {
-				this.assert() //检查用户配置
-				this.template = templateFactory(this) //生成所需列 默认模板 
+				this.template = templateFactory(this) //生成所需列 默认模板
 				this.initCols() //根据模板 初始化列
 				this.initSelected() //设置默认值
-			},
-			assert() {
-				if ("ymdhis".indexOf(this.mode) === -1)
-					throw new Error("render error，illegal 'mode'")
-
-				if (getLocalTime(this.mode) == undefined)
-					throw new Error("render error，the 'mode' is not found")
-
-				if (this.value != null) {
-					if (this.value.length !== getLocalTime(this.mode).length)
-						throw new Error("render error，because the 'value' cannot be formatted as 'mode'")
-					const arr = this.value.split(/-|:|\s/)
-					if (arr.length != this.modeArr.length)
-						throw new Error("render error，because the 'value' cannot be formatted as 'mode'")
-
-				}
-				if (this.yearRange.length !== 2)
-					throw new Error("render error，because the length of array 'year-rang' must be 2")
-
-				this.isError = false
 			},
 			initCols() {
 				for (const k of this.mode) {

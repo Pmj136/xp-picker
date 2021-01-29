@@ -1,6 +1,6 @@
 <template>
 	<view>
-		<xp-picker mode="ym" :action-position="actionPosition" :history="history" :year-range="[2020,2030]" @confirm="confirm">
+		<xp-picker mode="ym" :action-position="actionPosition" value="2020-06" :history="history" :year-range="[2020,2030]" @confirm="confirm">
 			<button>年月</button>
 		</xp-picker>
 		<xp-picker mode="md" :action-position="actionPosition" :history="history" :year-range="[2020,2030]" @confirm="confirm">
