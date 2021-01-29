@@ -22,7 +22,7 @@
 						</view>
 					</picker-view-column>
 				</picker-view>
-				<view v-if="actionPosition==='bottom'" class="xp-picker-button">
+				<view v-if="actionPosition==='bottom'" class="xp-picker-btns">
 					<button class="xp-button xp-button--cancel" @tap="_cancel">取消</button>
 					<button class="xp-button xp-button--confirm" @tap="_confirm">确定</button>
 				</view>
@@ -33,18 +33,20 @@
 
 <script>
 	import {
-		variables,
+		templateFactory,
 		getLocalTime,
 		fmtNumber,
 		time2Timestamp,
 		getDate
-	} from "./util.js"
+	} from "./util.min.js"
 	export default {
 		name: 'XpPicker',
 		data() {
 			return {
-				isError: false,
+				isError: true,
+				isConfirm: false,
 				pickerVisible: false,
+				template: {},
 				cols: [],
 				selected: []
 			}
@@ -79,6 +81,11 @@
 				default: false
 			}
 		},
+		watch: {
+			mode() {
+				this.render()
+			}
+		},
 		computed: {
 			hasSlot() {
 				return !!this.$slots['default']
@@ -88,58 +95,55 @@
 			},
 			units() {
 				const arr = []
-				for (const k in variables) {
-					if (this.mode.indexOf(k) !== -1) arr.push(variables[k].text)
+				for (const k in this.template) {
+					if (this.mode.indexOf(k) !== -1) arr.push(this.template[k].text)
 				}
 				return arr
-			}
+			},
 		},
 		created() {
-			this.assert()
-			this.initCols()
-			this.initSelected()
+			this.render()
 		},
 		methods: {
+			render() {
+				this.assert() //检查用户配置
+				this.template = templateFactory(this) //生成所需列 默认模板 
+				this.initCols() //根据模板 初始化列
+				this.initSelected() //设置默认值
+			},
 			assert() {
+				if ("ymdhis".indexOf(this.mode) === -1) {
+					throw new Error("render error，illegal 'mode'")
+				}
+				if (getLocalTime(this.mode) == undefined) {
+					throw new Error("render error，the 'mode' is not found")
+				}
 				if (this.value != null) {
 					const arr = this.value.split(/-|:|\s/)
 					if (arr.length != this.modeArr.length) {
-						this.isError = true
 						throw new Error("render error，because the 'value' cannot be formatted as 'mode'")
 					}
 				}
 				if (this.yearRange.length !== 2) {
-					this.isError = true
 					throw new Error("render error，because the length of array 'year-rang' must be 2")
 				}
-				if (this.yearRange != null) this.updateVariables("y", this.yearRange)
-
-				if (this.mode.indexOf("d") !== -1) {
-					const dtObj = this.datetime2Obj(this.value || getLocalTime(this.mode))
-					this.updateVariables("d", [1, getDate(dtObj)])
-				}
+				this.isError = false
 			},
 			initCols() {
-				this.modeArr.forEach((k, i) => {
-					const range = variables[k].range
+				for (const k of this.mode) {
+					const range = this.template[k].range
 					this.fillCol(k, ...range)
-				})
+				}
 			},
 			initSelected() {
 				const v = this.value || getLocalTime(this.mode)
 				this.setSelected(v)
 			},
-			updateVariables(k, arr) {
-				for (let i = 0; i < arr.length; i++) {
-					if (arr[i] != null) variables[k].range[i] = arr[i]
-				}
-			},
 			fillCol(k, s, e) {
 				const index = this.mode.indexOf(k)
 				let arr = []
-				for (let i = s; i <= e; i++) {
+				for (let i = s; i <= e; i++)
 					arr.push(fmtNumber(i))
-				}
 				this.$set(this.cols, index, arr)
 			},
 			//dt 时间字符串 如 '2020-02-16'
@@ -149,28 +153,10 @@
 				for (let i = 0; i < a.length; i++)
 					this.$set(this.selected, i, a[i].indexOf(arr[i]))
 			},
-			datetime2Obj(dt) {
-				const obj = {}
-				const arr = dt.split(/-|:|\s/)
-				for (const i in this.mode)
-					obj[this.mode[i]] = arr[i]
-				return obj
-			},
-			selected2Obj(value) {
-				const obj = {}
-				for (let i = 0; i < this.modeArr.length; i++) {
-					obj[this.modeArr[i]] = this.cols[i][value[i]]
-				}
-				return obj
-			},
-			resolveSelected() {
+			resolveCurrentDt() {
 				let str = ""
-				const arr = []
-				for (let i = 0; i < this.selected.length; i++) {
-					const v = this.cols[i][this.selected[i]] + this.units[i]
-					str += v
-					arr.push(v)
-				}
+				for (let i = 0; i < this.selected.length; i++)
+					str += this.cols[i][this.selected[i]] + this.units[i]
 				let dt = str
 					.replace('年', '-')
 					.replace('月', '-')
@@ -180,26 +166,27 @@
 					.replace('秒', '')
 				if (!this.mode.endsWith('s'))
 					dt = dt.substring(0, dt.length - 1)
-				return {
-					result: dt,
-					resultArr: arr
-				}
+				return dt
 			},
 			show() {
-				if (!this.history) this.initSelected()
+				if (this.history) {
+					if (!this.isConfirm) this.initSelected()
+				} else
+					this.initSelected()
 				this.pickerVisible = true
 			},
 			_confirm() {
 				if (!this.isError) this.$emit('confirm', this._getResult())
+				if (!this.isConfirm) this.isConfirm = true
 				this.pickerVisible = false
 			},
 			_getResult() {
-				const r = {
-					...this.resolveSelected()
+				const detail = {
+					value: this.resolveCurrentDt()
 				}
-				const tp = time2Timestamp(r.result)
-				if (!isNaN(tp)) r.timestamp = tp
-				return r
+				const tp = time2Timestamp(detail.value)
+				if (!isNaN(tp)) detail.timestamp = tp
+				return detail
 			},
 			_cancel() {
 				this.$emit('cancel')
@@ -214,12 +201,12 @@
 						break
 					}
 				}
+				this.selected = newValue
 				const index = this.mode.indexOf("d")
 				if (index !== -1 && (col === 'y' || col === 'm')) {
-					const dtObj = this.selected2Obj(newValue)
-					this.fillCol("d", 1, getDate(dtObj))
+					const currentDt = this.resolveCurrentDt()
+					this.fillCol("d", 1, getDate(currentDt))
 				}
-				this.selected = newValue
 			}
 		}
 	}
@@ -285,7 +272,7 @@
 		border-bottom: 0.5px solid #e5e5e5
 	}
 
-	.xp-picker-button {
+	.xp-picker-btns {
 		width: 100%;
 		display: flex;
 		justify-content: space-around;
@@ -297,7 +284,7 @@
 	}
 
 	.xp-button {
-		line-height: 2.4;
+		line-height: 2.3;
 		font-size: 32rpx;
 		margin: 0;
 		padding: 0 80rpx;
