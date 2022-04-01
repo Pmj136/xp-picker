@@ -25,22 +25,53 @@ const variables = {
 		range: [0, 59]
 	}
 }
-export function templateFactory({
-	mode,
-	value,
-	yearRange
-}) {
-	const [start, end] = yearRange
+
+function templateFactory(args) {
+	const {
+		mode,
+		yearRange
+	} = args
+	let val
+	// #ifdef VUE2
+	val = args.value
+	// #endif
+	// #ifdef VUE3
+	val = args.modelValue
+	// #endif
 	let ret = {}
 	for (const key of mode) {
 		ret[key] = variables[key]
 	}
-	if (mode.indexOf("y") !== -1) ret['y'].range = [start || 2016, end || new Date().getFullYear()]
+	if (mode.indexOf("y") !== -1) ret['y'].range = yearRange
 	if (mode.indexOf("d") !== -1) {
-		const date = getDate(value || getLocalTime(mode))
+		const date = getDate(val || getLocalTime(mode))
 		ret['d'].range = [1, date]
 	}
 	return ret
+}
+
+export function generateUntisAndCols(target) {
+	const raw = templateFactory(target)
+	const units = [],
+		cols = []
+	const mode = target.mode
+	for (let index = 0; index < mode.length; index++) {
+		const s = mode[index]
+		const {
+			text,
+			range
+		} = raw[s]
+		units.push(text)
+		const tmp = [],
+			[start, end] = range
+		for (let i = start; i <= end; i++)
+			tmp.push(fmtNumber(i))
+		cols[index] = tmp
+	}
+	return {
+		units,
+		cols
+	}
 }
 export function getDate(dt) {
 	const s = dt.substring(0, dt.lastIndexOf("-"))
@@ -53,12 +84,12 @@ export function getDate(dt) {
 			break;
 		case 2:
 			year = d.getFullYear()
-			month = parseInt(s)
+			month = +s
 			break;
 		default:
 			const [y, m] = s.split("-")
-			year = parseInt(y)
-			month = parseInt(m)
+			year = +y
+			month = +m
 			break;
 	}
 	const days = [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
@@ -90,7 +121,7 @@ export function getLocalTime(fmt) {
 		'ymdh': `${y}-${m}-${d} ${h}`,
 		'mdhi': `${m}-${d} ${h}:${i}`,
 		'mdhis': `${m}-${d} ${h}:${m}:${s}`,
-		'yd':`${y}-${d}`,
+		'yd': `${y}-${d}`,
 		'ymdhi': `${y}-${m}-${d} ${h}:${i}`,
 		'ymdhis': `${y}-${m}-${d} ${h}:${i}:${s}`,
 	}
@@ -100,6 +131,34 @@ export function fmtNumber(n) {
 	// return n.toString().padStart(2,"0")
 	return n > 9 ? n + "" : "0" + n
 }
-export function time2Timestamp(timer) {
-	return new Date(timer).getTime()
+export function getForm(name = 'uniForms') {
+	let parent = this.$parent;
+	let parentName = parent.$options.name;
+	while (parentName !== name) {
+		parent = parent.$parent;
+		if (!parent) return false;
+		parentName = parent.$options.name;
+	}
+	return parent;
+}
+
+export function getSelectedDateTimeStr({
+	selected,
+	units,
+	cols,
+	mode
+}) {
+	let str = ""
+	for (let i = 0; i < selected.length; i++)
+		str += cols[i][selected[i]] + units[i]
+	let dt = str
+		.replace('年', '-')
+		.replace('月', '-')
+		.replace('日', ' ')
+		.replace('时', ':')
+		.replace('分', ':')
+		.replace('秒', '')
+	if (!mode.endsWith('s'))
+		dt = dt.substring(0, dt.length - 1)
+	return dt
 }

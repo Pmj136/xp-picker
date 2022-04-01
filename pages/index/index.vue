@@ -1,51 +1,20 @@
 <template>
 	<view>
-		<xp-picker mode="ym" :action-position="actionPosition" value="2020-06" :history="history" :year-range="[2020,2030]" @confirm="confirm">
-			<button>年月</button>
-		</xp-picker>
-		<xp-picker mode="md" :action-position="actionPosition" :history="history" :year-range="[2020,2030]" @confirm="confirm">
-			<button>月日</button>
-		</xp-picker>
-		<xp-picker mode="hi" :action-position="actionPosition" :history="history" :year-range="[2020,2030]" @confirm="confirm">
-			<button>时分</button>
-		</xp-picker>
-		<xp-picker mode="is" :action-position="actionPosition" :history="history" :year-range="[2020,2030]" @confirm="confirm">
-			<button>分秒</button>
-		</xp-picker>
-		<xp-picker :action-position="actionPosition" :history="history" :year-range="[2020,2030]" @confirm="confirm">
-			<button>年月日</button>
-		</xp-picker>
-		<xp-picker mode="mdh" :action-position="actionPosition" :history="history" :year-range="[2020,2030]" @confirm="confirm">
-			<button>月日时</button>
-		</xp-picker>
-		<xp-picker mode="his" :action-position="actionPosition" :history="history" :year-range="[2020,2030]" @confirm="confirm">
-			<button>时分秒</button>
-		</xp-picker>
-		<xp-picker mode="ymdhi" :action-position="actionPosition" :history="history" :year-range="[2020,2030]" @confirm="confirm">
-			<button>年月日时分</button>
-		</xp-picker>
-		<xp-picker mode="ymdhis" :action-position="actionPosition" :history="history" :year-range="[2020,2030]" @confirm="confirm">
-			<button>年月日时分秒</button>
-		</xp-picker>
-
-		<view class="wrap">
-			<text class="label">按钮位置</text>
-			<radio-group @change="radioChange" style="display: flex;">
-				<view style="margin-right: 20rpx;">
-					<radio value="bottom" :checked="actionPosition === 'bottom'" />
-					<view>底部</view>
-				</view>
-				<view>
-					<radio value="top" :checked="actionPosition === 'top'" />
-					<view>顶部</view>
-				</view>
-			</radio-group>
-		</view>
-
-		<view class="wrap">
-			<text class="label">历史模式</text>
-			<switch :checked="history" @change="change" />
-		</view>
+		<uni-forms ref="form" :modelValue="form" :rules="{str:{rules:[{required:true,errorMessage:'aaa'}]}}">
+			<uni-forms-item name="str" required label="时间" >
+				<xp-picker :mode="mode" v-model="form.str"/>
+			</uni-forms-item>
+			<uni-forms-item name="nnn" required label="名称">
+				<uni-easyinput v-model="form.nnn" :inputBorder="false" placeholder="请输入名称"></uni-easyinput>
+			</uni-forms-item>
+		</uni-forms>
+		<!-- #ifdef VUE3 -->
+		<xp-picker :mode="mode" :modelValue="form.str" @input="handleInput"/>
+		<!-- #endif -->
+		<!-- #ifdef VUE2 -->
+		<xp-picker :mode="mode" :value="form.str" @input="handleInput"/>
+		<!-- #endif -->
+		<button type="default" @click="valid">触发表单验证</button>
 	</view>
 </template>
 
@@ -53,24 +22,20 @@
 	export default {
 		data() {
 			return {
-				actionPosition: "bottom",
-				history: true
+				form:{
+					str:""
+				},
+				mode:'ymdhis'
 			}
 		},
+		created() {
+		},
 		methods: {
-			radioChange(e) {
-				this.actionPosition = e.detail.value
+			valid(){
+				this.$refs.form.validate()
 			},
-			confirm(e) {
-				console.log(e)
-				uni.showToast({
-					icon: 'none',
-					duration: 3000,
-					title: e.value
-				})
-			},
-			change(e) {
-				this.history = e.detail.value
+			handleInput(e){
+				this.form.str=e
 			}
 		}
 	}
